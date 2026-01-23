@@ -2,163 +2,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Learning Space</title>
-  <link rel="icon" href="data:,">
-  <style>
-    /* ======================
-       GLOBAL STYLES
-       ====================== */
-    body {
-      background-color: #111;
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      font-family: sans-serif;
-      color: white;
-    }
+<meta charset="UTF-8">
+<title>Learning Space</title>
+<link rel="icon" type="image/png" href="learning-space (1)-Photoroom.png">
 
-    /* ======================
-       UI ELEMENTS
-       ====================== */
-    .game-area {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px;
-      height: 600px;
-      background-color: #222;
-      border: 3px solid #000;
-      z-index: 9999;
-    }
+<style>
+/* ======================
+   GLOBAL STYLES
+   ====================== */
+body {
+  background:#111;
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  font-family:sans-serif;
+  color:white;
+}
 
-    input[type="range"] {
-      width: 200px;
-    }
+/* ======================
+   GAME AREA
+   ====================== */
+.game-area {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:600px;
+  height:600px;
+  background:#222;
+  border:3px solid #000;
+  z-index:9999;
+}
 
-    input[type="range"]:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+.player { position:absolute; width:40px; height:40px; }
+.coin { position:absolute; width:30px; height:30px; background:gold; border-radius:50%; }
+.label { position:absolute; font-weight:bold; }
 
-    #saveButton {
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 8px 16px;
-      font-weight: bold;
-      z-index: 15000;
-      cursor: pointer;
-    }
+/* ======================
+   COIN PICKUP EFFECTS
+   ====================== */
+@keyframes coinPop {
+  0%   { transform: scale(1); opacity: 1; }
+  60%  { transform: scale(1.6); opacity: 0.8; }
+  100% { transform: scale(0.2); opacity: 0; }
+}
 
-    .player {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-    }
+.coin.pickup {
+  animation: coinPop 300ms ease-out forwards;
+}
 
-    .coin {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      background-color: gold;
-      border-radius: 50%;
-    }
+/* Floating +1 text */
+.floating-text {
+  position: absolute;
+  color: gold;
+  font-weight: bold;
+  pointer-events: none;
+  animation: floatUp 700ms ease-out forwards;
+}
 
-    .label {
-      position: absolute;
-      font-weight: bold;
-    }
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-30px); opacity: 0; }
+}
 
-    /* ======================
-       MENU
-       ====================== */
-    .menu {
-      position: fixed;
-      inset: 0;
-      background: #111;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 20000;
-    }
+@keyframes coinSpawn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
-    .menu-options,
-    .menu-sliders {
-      margin: 12px 0;
-      text-align: center;
-    }
+.coin.spawn {
+  animation: coinSpawn 250ms ease-out;
+}
 
-    .menu button {
-      padding: 10px 20px;
-      font-size: 18px;
-      cursor: pointer;
-    }
+   
+/* ======================
+   MENU
+   ====================== */
+.menu {
+  position:fixed;
+  inset:0;
+  background:#111;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:20000;
+}
 
-    /* ======================
-       GAME OVER
-       ====================== */
-    .game-over {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 30000;
-      text-align: center;
-    }
+.menu-sliders { text-align:center; margin:12px 0; }
+.menu button { padding:10px 20px; font-size:18px; cursor:pointer; }
 
-    .game-over h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
+/* ======================
+   GAME OVER
+   ====================== */
+.game-over {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:30000;
+  text-align:center;
+}
 
-    .game-over p {
-      font-size: 20px;
-      margin: 6px 0;
-    }
+.game-over button {
+  margin-top:12px;
+  padding:10px 24px;
+  font-size:18px;
+  cursor:pointer;
+}
 
-    .game-over button {
-      margin-top: 20px;
-      padding: 10px 24px;
-      font-size: 18px;
-      cursor: pointer;
-    }
+/* ======================
+   LOADING OVERLAY
+   ====================== */
+.loading {
+  position:fixed;
+  inset:0;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:40000;
+  font-size:24px;
+}
 
-    /* ======================
-       HIDDEN
-       ====================== */
-    .hidden {
-      display: none !important;
-    }
-  </style>
+.pause {
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(2px);
+}
+   
+/* ======================
+   HIDDEN
+   ====================== */
+.hidden { display:none !important; }
+</style>
 </head>
 <body>
 
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loadingScreen" class="loading">
+  Loading saved data…
+</div>
+   
+<!-- ===== COUNTDOWN OVERLAY ===== -->
+<div id="countdown" class="loading hidden"></div>
+
+<!-- ===== PAUSE OVERLAY ===== -->
+<div id="pauseOverlay" class="loading hidden">
+  <div style="text-align:center">
+    <h1>Paused</h1>
+    <p>Press ESC to Resume</p>
+  </div>
+</div>
+   
 <!-- ===== MENU ===== -->
-<div id="menu" class="menu">
+<div id="menu" class="menu hidden">
   <h1>Learning Space</h1>
 
-  <div class="menu-options">
+  <div>
     <label><input type="radio" name="mode" value="1" checked> Single Player</label>
     <label><input type="radio" name="mode" value="2"> Two Players</label>
   </div>
 
   <div class="menu-sliders">
-    <div>
-      Player 1 Speed:
-      <input type="range" id="menuSpeed1" min="1" max="10">
-    </div>
-    <br>
-    <div>
-      Player 2 Speed:
-      <input type="range" id="menuSpeed2" min="1" max="10">
-    </div>
+    Player 1 Speed:
+    <input type="range" id="menuSpeed1" min="1" max="10">
+    <br><br>
+    Player 2 Speed:
+    <input type="range" id="menuSpeed2" min="1" max="10">
   </div>
 
   <button id="startButton">Start Game</button>
@@ -173,270 +192,515 @@
   <p id="finalScore2"></p>
   <p id="finalHighScore1"></p>
   <p id="finalHighScore2"></p>
+
   <button id="gameOverReplay">Replay</button>
+  <button id="backToMenu">Back to Menu</button> <!-- NEW -->
 </div>
 
 <script>
 /* ======================
    CONSTANTS & STATE
    ====================== */
-const GAME_SIZE = 600;
-const PLAYER_SIZE = 40;
-const COIN_SIZE = 30;
-
-let gameOver = false;
-let timeLeft = 60;
-let timerInterval;
-let gameMode = 1;
-
-/* ======================
-   MENU ELEMENTS
-   ====================== */
-const menu = document.getElementById('menu');
-const startButton = document.getElementById('startButton');
-const saveButton = document.getElementById('saveButton');
-const menuSpeed1 = document.getElementById('menuSpeed1');
-const menuSpeed2 = document.getElementById('menuSpeed2');
-const modeButtons = document.getElementsByName('mode');
+const coinSound = new Audio('coin.mp3');
+coinSound.volume = 0.6;      // adjust to taste
+coinSound.preload = 'auto';
+const GAME_SIZE=600, PLAYER_SIZE=40, COIN_SIZE=30;
+let gameOver=false, timeLeft=60, timerInterval;
+let gameMode=1;
+let rafId = null;
+let isPaused = false;
+let isCountingDown = false;
+const countdown = document.getElementById('countdown');
 
 /* ======================
-   GAME OVER ELEMENTS
+   ELEMENTS
    ====================== */
-const gameOverScreen = document.getElementById('gameOverScreen');
-const finalScore1 = document.getElementById('finalScore1');
-const finalScore2 = document.getElementById('finalScore2');
-const finalHighScore1 = document.getElementById('finalHighScore1');
-const finalHighScore2 = document.getElementById('finalHighScore2');
-const gameOverReplay = document.getElementById('gameOverReplay');
+const loadingScreen=document.getElementById('loadingScreen');
+const menu=document.getElementById('menu');
+const startButton=document.getElementById('startButton');
+const saveButton=document.getElementById('saveButton');
+const menuSpeed1=document.getElementById('menuSpeed1');
+const menuSpeed2=document.getElementById('menuSpeed2');
+const modeButtons=document.getElementsByName('mode');
 
+const gameOverScreen=document.getElementById('gameOverScreen');
+const backToMenu=document.getElementById('backToMenu');
+const gameOverReplay=document.getElementById('gameOverReplay');
+
+const finalScore1=document.getElementById('finalScore1');
+const finalScore2=document.getElementById('finalScore2');
+const finalHighScore1=document.getElementById('finalHighScore1');
+const finalHighScore2=document.getElementById('finalHighScore2');
+
+const pauseOverlay = document.getElementById('pauseOverlay');
 /* ======================
-   PLAYERS & SCORES
+   SCORES
    ====================== */
-let score1 = 0;
-let score2 = 0;
-let highScore1 = Number(localStorage.getItem('highScore1')) || 0;
-let highScore2 = Number(localStorage.getItem('highScore2')) || 0;
-let step1 = Number(localStorage.getItem('player1Speed')) ?? 3;
-let step2 = Number(localStorage.getItem('player2Speed')) ?? 3;
+let score1=0, score2=0;
+let highScore1=Number(localStorage.getItem('highScore1'))||0;
+let highScore2=Number(localStorage.getItem('highScore2'))||0;
+let step1 = safeGet('player1Speed', 3);
+let step2 = safeGet('player2Speed', 3);
 
+function el(tag, opts = {}) { 
+   const e = document.createElement(tag); 
+   if (opts.class) e.className = opts.class; 
+   if (opts.text != null) e.textContent = opts.text; 
+   if (opts.css) Object.assign(e.style, opts.css); 
+   if (opts.parent) opts.parent.appendChild(e); 
+   return e; 
+}
+   
 /* ======================
    GAME AREA
    ====================== */
-const gameArea = document.createElement('div');
-gameArea.className = 'game-area';
+const gameArea=document.createElement('div');
+gameArea.className='game-area';
 document.body.appendChild(gameArea);
 
 function createPlayer(color, x, y) {
-  const p = document.createElement('div');
-  p.className = 'player';
-  p.style.backgroundColor = color;
-  p.style.left = x + 'px';
-  p.style.top = y + 'px';
-  return p;
+   return el('div',{
+      class: 'player',
+      css: {
+         backgroundColor: color,
+         left: x + 'px',
+         top: y + 'px' 
+      }, 
+      parent: gameArea 
+   }); 
 }
 
-const player1 = createPlayer('#ff4d4d', 100, 180);
-const player2 = createPlayer('#4d4dff', 450, 180);
-gameArea.append(player1, player2);
+const player1=createPlayer('#ff4d4d',100,180);
+const player2=createPlayer('#4d4dff',450,180);
+gameArea.append(player1,player2);
 
 /* ======================
    LABELS
    ====================== */
 function makeLabel(text, top, left) {
-  const el = document.createElement('div');
-  el.className = 'label';
-  el.textContent = text;
-  el.style.top = top;
-  el.style.left = left;
-  gameArea.appendChild(el);
-  return el;
+   return el('div',{
+      class: 'label',
+      text,
+      css: {
+         top, left },
+      parent: gameArea 
+   }); 
 }
 
-const scoreDisplay1 = makeLabel('Score: 0', '5px', '5px');
-const highScoreDisplay1 = makeLabel(`High Score: ${highScore1}`, '25px', '5px');
-const scoreDisplay2 = makeLabel('Score: 0', '5px', '500px');
-const highScoreDisplay2 = makeLabel(`High Score: ${highScore2}`, '25px', '500px');
-const timerDisplay = makeLabel('Time: 60', '5px', '50%');
-timerDisplay.style.transform = 'translateX(-50%)';
+const scoreDisplay1=makeLabel('Score: 0','5px','5px');
+const scoreDisplay2=makeLabel('Score: 0','5px','500px');
+const highScoreDisplay1=makeLabel('High Score: '+highScore1,'25px','5px');
+const highScoreDisplay2=makeLabel('High Score: '+highScore2,'25px','500px');
+const timerDisplay=makeLabel('Time: 60','5px','50%');
+timerDisplay.style.transform='translateX(-50%)';
 
-const player2UI = [player2, scoreDisplay2, highScoreDisplay2];
+const player2UI=[player2,scoreDisplay2,highScoreDisplay2];
 
 /* ======================
    COINS
    ====================== */
-let coins = [];
-
+let coins=[];
 function spawnCoin() {
-  const c = document.createElement('div');
-  c.className = 'coin';
-  c.style.left = Math.random() * (GAME_SIZE - COIN_SIZE) + 'px';
-  c.style.top = Math.random() * (GAME_SIZE - COIN_SIZE) + 'px';
-  gameArea.appendChild(c);
-  coins.push(c);
+   const c = el('div', {
+      class: 'coin spawn',
+      css: {
+         left: Math.random() * (GAME_SIZE - COIN_SIZE) + 'px',
+         top: Math.random() * (GAME_SIZE - COIN_SIZE) + 'px' 
+      }, 
+      parent: gameArea 
+   }); 
+   coins.push(c); 
+   setTimeout(() => c.classList.remove('spawn'), 250);
 }
 
-for (let i = 0; i < 10; i++) spawnCoin();
+
+function showFloatingText(text, x, y) {
+   const el = el('div',{
+      class: 'floating-text', 
+      text,
+      css: {
+         left: x + 'px', top: y + 'px' 
+      }, 
+      parent: gameArea 
+   }); 
+   setTimeout(() => el.remove(), 700); 
+}
 
 /* ======================
    INPUT
    ====================== */
-const keys = {};
-document.addEventListener('keydown', e => keys[e.key] = true);
-document.addEventListener('keyup', e => keys[e.key] = false);
+const keys={};
+document.addEventListener('keydown',e=>keys[e.key]=true);
+document.addEventListener('keyup',e=>keys[e.key]=false);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !menu.classList.contains('hidden')) return;
+  if (isCountingDown) return;
+  if (e.key === 'Escape' && !gameOver) {
+    isPaused = !isPaused;
+
+    if (isPaused) {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  pauseOverlay.classList.remove('hidden');
+} else {
+  pauseOverlay.classList.add('hidden');
+  startTimer();
+}
+  }
+});
 
 /* ======================
    GAME LOOP
    ====================== */
-function movePlayer(p, step, u, d, l, r) {
-  let x = parseInt(p.style.left) || 0;
-  let y = parseInt(p.style.top) || 0;
-
-  if (keys[u]) y -= step;
-  if (keys[d]) y += step;
-  if (keys[l]) x -= step;
-  if (keys[r]) x += step;
-
-  p.style.left = Math.max(0, Math.min(GAME_SIZE - PLAYER_SIZE, x)) + 'px';
-  p.style.top = Math.max(0, Math.min(GAME_SIZE - PLAYER_SIZE, y)) + 'px';
+function movePlayer(p,step,u,d,l,r){
+  let x=parseInt(p.style.left)||0;
+  let y=parseInt(p.style.top)||0;
+  if(keys[u])y-=step;
+  if(keys[d])y+=step;
+  if(keys[l])x-=step;
+  if(keys[r])x+=step;
+  p.style.left=Math.max(0,Math.min(GAME_SIZE-PLAYER_SIZE,x))+'px';
+  p.style.top=Math.max(0,Math.min(GAME_SIZE-PLAYER_SIZE,y))+'px';
 }
 
-function checkCollision(p, id) {
-  for (let i = coins.length - 1; i >= 0; i--) {
-    const c = coins[i];
-    const px = parseInt(p.style.left);
-    const py = parseInt(p.style.top);
-    const cx = parseInt(c.style.left);
-    const cy = parseInt(c.style.top);
+function checkCollision(p,id){
+  for (let i = coins.length - 1; i >= 0; i--){
+    const c=coins[i];
+    const px=parseInt(p.style.left), py=parseInt(p.style.top);
+    const cx=parseInt(c.style.left), cy=parseInt(c.style.top);
 
-    if (px < cx + COIN_SIZE && px + PLAYER_SIZE > cx &&
-        py < cy + COIN_SIZE && py + PLAYER_SIZE > cy) {
-      gameArea.removeChild(c);
-      coins.splice(i, 1);
+    if(px<cx+COIN_SIZE && px+PLAYER_SIZE>cx &&
+       py<cy+COIN_SIZE && py+PLAYER_SIZE>cy){
+
+      // Visual pickup
+      c.classList.add('pickup');
+
+      // Floating +1
+      showFloatingText('+1', cx + 10, cy - 5);
+
+      // Sound (fails silently if blocked)
+      try {
+     const s = coinSound.cloneNode();
+      s.playbackRate = 0.95 + Math.random() * 0.6; // pitch variation
+     s.play();
+     } catch {}
+
+      // Remove coin after animation
+      setTimeout(() => {
+        if (c.parentNode) c.remove();
+      }, 300);
+
+      coins.splice(i,1);
       spawnCoin();
-      if (id === 1) {
+
+      if(id===1){
         score1++;
-        scoreDisplay1.textContent = `Score: ${score1}`;
-      } else {
+        scoreDisplay1.textContent=`Score: ${score1}`;
+      } else if (gameMode === 2) {
         score2++;
-        scoreDisplay2.textContent = `Score: ${score2}`;
+        scoreDisplay2.textContent=`Score: ${score2}`;
       }
     }
   }
 }
 
-function gameLoop() {
-  if (!gameOver) {
-    movePlayer(player1, step1, 'w', 's', 'a', 'd');
-    checkCollision(player1, 1);
+function gameLoop(){
+  if(!gameOver && !isPaused && !isCountingDown){
+
+
+    if (gameMode === 1) {
+      // SINGLE PLAYER: WASD + Arrow Keys control Player 1
+      movePlayer(player1, step1, 'w','s','a','d');
+      movePlayer(player1, step1, 'ArrowUp','ArrowDown','ArrowLeft','ArrowRight');
+      checkCollision(player1, 1);
+    }
 
     if (gameMode === 2) {
-      movePlayer(player2, step2, 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight');
+      // TWO PLAYER: Split controls
+      movePlayer(player1, step1, 'w','s','a','d');
+      movePlayer(player2, step2, 'ArrowUp','ArrowDown','ArrowLeft','ArrowRight');
+      checkCollision(player1, 1);
       checkCollision(player2, 2);
     }
+
   }
-  requestAnimationFrame(gameLoop);
+
+  rafId = requestAnimationFrame(gameLoop);
 }
 
 /* ======================
-   TIMER & END GAME
+   TIMER
    ====================== */
-function startTimer() {
-  timerInterval = setInterval(() => {
+if (timerInterval) clearInterval(timerInterval);
+function startTimer(){
+  if (isPaused || isCountingDown) return;
+  timerInterval=setInterval(()=>{
     timeLeft--;
     timerDisplay.textContent = `Time: ${timeLeft}`;
-    if (timeLeft <= 0) {
+    if(timeLeft<=0){
       clearInterval(timerInterval);
-      gameOver = true;
-      updateHighScores();
+      gameOver=true;
+      endGame();
     }
-  }, 1000);
+  },1000);
 }
 
-function updateHighScores() {
-  if (score1 > highScore1) highScore1 = score1;
-  if (gameMode === 2 && score2 > highScore2) highScore2 = score2;
+function endGame(){ 
+  highScore1 = Math.max(highScore1, score1);
+
+  if (gameMode === 2) {
+     highScore2 = Math.max(highScore2, score2);
+  }
 
   finalScore1.textContent = `Player 1 Score: ${score1}`;
   finalHighScore1.textContent = `Player 1 High Score: ${highScore1}`;
+  highScoreDisplay1.textContent = 'High Score: ' + highScore1;
 
-  if (gameMode === 2) {
-    finalScore2.textContent = `Player 2 Score: ${score2}`;
+  if(gameMode===2){
     finalHighScore2.textContent = `Player 2 High Score: ${highScore2}`;
     finalScore2.classList.remove('hidden');
-    finalHighScore2.classList.remove('hidden');
+    highScoreDisplay2.textContent = 'High Score: ' + highScore2;
   } else {
     finalScore2.classList.add('hidden');
     finalHighScore2.classList.add('hidden');
   }
-
-  syncSave();
   gameOverScreen.classList.remove('hidden');
+   // SAVE IMMEDIATELY ON GAME OVER
+   saveAll();
 }
 
+async function startCountdown() {
+  isCountingDown = true;
+  countdown.classList.remove('hidden');
+
+  const steps = ['3', '2', '1', 'GO!'];
+
+  for (const text of steps) {
+    countdown.textContent = text;
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  countdown.classList.add('hidden');
+  isCountingDown = false;
+
+  startTimer();
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  for (let i = 0; i < 10; i++) spawnCoin();
+  startCountdown();
+}
+   
 /* ======================
-   MENU BEHAVIOR
+   MENU CONTROL
    ====================== */
-function updatePlayer2UI() {
-  const single = gameMode === 1;
-  menuSpeed2.disabled = single;
-  player2UI.forEach(el => el.classList.toggle('hidden', single));
+function updatePlayer2UI(){
+  const single=gameMode===1;
+  menuSpeed2.disabled=single;
+  player2UI.forEach(el=>el.classList.toggle('hidden',single));
 }
 
-modeButtons.forEach(rb => {
-  rb.addEventListener('change', () => {
-    gameMode = Number(rb.value);
+modeButtons.forEach(rb=>{
+  rb.addEventListener('change',()=>{
+    gameMode=Number(rb.value);
     updatePlayer2UI();
   });
 });
 
-startButton.onclick = () => {
-  step1 = Number(menuSpeed1.value);
-  step2 = Number(menuSpeed2.value);
+startButton.onclick=()=>{
+  resetGameState();
+  step1=Number(menuSpeed1.value);
+  if (gameMode === 2) {
+     step2=Number(menuSpeed2.value);
+  }
+   
   menu.classList.add('hidden');
   saveButton.classList.remove('hidden');
-  updatePlayer2UI();
-  startTimer();
-  requestAnimationFrame(gameLoop);
+   
+  startGame();
+   
+  localStorage.setItem('player1Speed', step1);
+  if (gameMode === 2) {
+    localStorage.setItem('player2Speed', step2);
+  }
 };
 
-saveButton.onclick = () => {
-  syncSave();
-  alert('Saved!');
+saveButton.onclick = async () => {
+  saveAll();
+  alert('Game Saved!');
 };
-
-gameOverReplay.onclick = () => location.reload();
 
 /* ======================
-   STORAGE
+   BACK TO MENU
    ====================== */
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwct-j94qIwoqet8fc3uss54WZ0uK2EsBpQSUkcb6N5nOtHofouSSsldnVZiaJ7XKlvOw/exec';
+function resetGameState(){
+  gameOver = false;
+  isPaused = false;
+  timeLeft = 60;
+  score1 = 0;
+  score2 = 0;
 
-async function syncLoad() {
-  try {
-    const res = await fetch(SHEET_URL + '?action=getData');
-    const data = await res.json();
-    data.forEach(([p, h, s]) => {
-      if (p === 'Player1') { highScore1 = h; step1 = s; }
-      if (p === 'Player2') { highScore2 = h; step2 = s; }
-    });
-  } catch {}
-  menuSpeed1.value = step1;
-  menuSpeed2.value = step2;
+  coins.forEach(c => c.remove());
+  coins = [];
+
+  timerDisplay.textContent = 'Time: 60';
+  scoreDisplay1.textContent = 'Score: 0';
+  scoreDisplay2.textContent = 'Score: 0';
+
+  pauseOverlay.classList.add('hidden');
+
+  clearInterval(timerInterval);
+  if (rafId) cancelAnimationFrame(rafId);
 }
 
-function syncSave() {
-  localStorage.setItem('player1Speed', step1);
-  localStorage.setItem('player2Speed', step2);
-  localStorage.setItem('highScore1', highScore1);
-  localStorage.setItem('highScore2', highScore2);
+backToMenu.onclick=()=>{
+  gameOverScreen.classList.add('hidden');
+  menu.classList.remove('hidden');
+  saveButton.classList.add('hidden');
+
+   resetGameState();
+};
+
+gameOverReplay.onclick = () => {
+  gameOverScreen.classList.add('hidden');
+  resetGameState();
+
+  startGame();
+};
+
+/* ======================
+   STORAGE (LOAD)
+   ====================== */
+
+function safeGet(key, fallback = 0) {
+  try {
+    const v = localStorage.getItem(key);
+    return v !== null ? Number(v) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function safeSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+}
+
+function mergeHighScore(current, local, remote) {
+  return Math.max(current || 0, local || 0, remote || 0);
+}
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbzzzREvNTl4Fnz4dKDMDqvRQ9U7zZavsaL7DpQkaYCR_sLDmT6EQG7yuMNAMbNY4uGODw/exec';
+
+async function saveAll() {
+  // Local save
+  safeSet('highScore1', highScore1);
+  safeSet('highScore2', highScore2);
+  safeSet('player1Speed', step1);
+  safeSet('player2Speed', step2);
+
+  try {
+    // Player 1
+    res = await fetch(API_URL,
+    { method: 'POST',
+     headers: { 
+        'Content-Type': 'application/json' },
+     body: JSON.stringify({ 
+        player: 'Player1', 
+        highScore: highScore1, 
+        speed: step1 
+     }) 
+    });
+
+    let result = await res.json();
+    if (!result.success) {
+      console.warn('Player1 save failed', result);
+    }
+
+    // Player 2
+    if (gameMode === 2) {
+    res = await fetch(API_URL,
+    { method: 'POST',
+     headers: { 
+        'Content-Type': 'application/json' },
+     body: JSON.stringify({ 
+        player: 'Player2', 
+        highScore: highScore2, 
+        speed: step2 
+     }) 
+    });
+
+      result = await res.json();
+      if (!result.success) {
+        console.warn('Player2 save failed', result);
+      }
+    }
+  } catch (e) {
+    console.warn('Remote save failed', e);
+  }
+}
+
+
+
+async function syncLoad(){
+  // 1. Load LOCAL first
+  const localH1 = safeGet('highScore1');
+  const localH2 = safeGet('highScore2');
+  const localS1 = safeGet('player1Speed', 3);
+  const localS2 = safeGet('player2Speed', 3);
+
+  let remoteH1 = 0, remoteH2 = 0;
+  let remoteS1 = localS1, remoteS2 = localS2;
+
+  // 2. Try REMOTE
+  try {
+    const res = await fetch(
+      'https://script.google.com/macros/s/AKfycbzzzREvNTl4Fnz4dKDMDqvRQ9U7zZavsaL7DpQkaYCR_sLDmT6EQG7yuMNAMbNY4uGODw/exec?action=getData'
+    );
+    const data = await res.json();
+
+    data.forEach(([p, h, s]) => {
+      if (p === 'Player1') { remoteH1 = h; remoteS1 = s; }
+      if (p === 'Player2') { remoteH2 = h; remoteS2 = s; }
+    });
+  } catch {}
+
+  // 3. Merge scores
+  highScore1 = mergeHighScore(highScore1, localH1, remoteH1);
+  highScore2 = mergeHighScore(highScore2, localH2, remoteH2);
+
+  // 4. Choose speeds (remote > local > default)
+  step1 = remoteS1 ?? localS1;
+  step2 = remoteS2 ?? localS2;
+
+  // 5. Write merged result back to LOCAL
+  safeSet('highScore1', highScore1);
+  safeSet('highScore2', highScore2);
+  safeSet('player1Speed', step1);
+  safeSet('player2Speed', step2);
+
+  // 6. Update UI
+  menuSpeed1.value = step1;
+  menuSpeed2.value = step2;
+  highScoreDisplay1.textContent = 'High Score: ' + highScore1;
+  highScoreDisplay2.textContent = 'High Score: ' + highScore2;
 }
 
 /* ======================
    INIT
    ====================== */
-(async () => {
+(async()=>{
+  menuSpeed1.disabled=true;
+  menuSpeed2.disabled=true;
   await syncLoad();
   updatePlayer2UI();
+  loadingScreen.classList.add('hidden');
+  menu.classList.remove('hidden');
+  menuSpeed1.disabled=false;
 })();
 </script>
 </body>
